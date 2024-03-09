@@ -1,5 +1,7 @@
 package com.task.ktsimple.model
 
+import io.realm.kotlin.ext.realmListOf
+import io.realm.kotlin.types.RealmList
 import io.realm.kotlin.types.RealmObject
 import io.realm.kotlin.types.annotations.PrimaryKey
 
@@ -17,4 +19,5 @@ open class User() : RealmObject {
     var passWord : String = ""
     var signedIn : Boolean = false
     var avatar = (0..5).random()
+    var locations : RealmList<Location> = realmListOf()
 }

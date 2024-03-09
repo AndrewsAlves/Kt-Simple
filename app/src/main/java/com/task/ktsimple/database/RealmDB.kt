@@ -1,7 +1,9 @@
 package com.task.ktsimple.database
 
+import android.util.Log
 import com.task.ktsimple.enums.AuthErrors
 import com.task.ktsimple.exceptions.AuthException
+import com.task.ktsimple.model.Location
 import com.task.ktsimple.model.User
 import io.realm.kotlin.Realm
 import io.realm.kotlin.RealmConfiguration
@@ -16,8 +18,12 @@ object RealmDB {
 
     var realmDb : Realm? = null
 
+    var currentUser : User? = null
+
+    val TAG = "Realm DB Kt"
+
     private fun openRealm() {
-        val config = RealmConfiguration.create(schema = setOf(User::class))
+        val config = RealmConfiguration.create(schema = setOf(User::class, Location::class))
         realmDb = Realm.open(config)
     }
 
@@ -76,6 +82,28 @@ object RealmDB {
         val userResult: List<User> = realmDb!!.query<User>("signedIn == true").find()
         //realmDb.close()
         return userResult
+    }
+
+    fun appendLocation(time : Long, lat : Double, lon : Double, address : String) {
+
+        if (currentUser == null) return
+
+        Log.d(TAG, "Appending")
+
+        if (realmDb == null) openRealm()
+
+        realmDb!!.writeBlocking {
+            val userResult: User = query<User>("userName == $0", currentUser!!.userName).find().first()
+            userResult.locations.add(Location(time, lat, lon, address))
+        }
+    }
+
+    fun updateCurrentUserLocations() : User {
+        if (realmDb == null) openRealm()
+        // Check if user exists
+        val userResult: User = realmDb!!.query<User>("userName == $0", currentUser!!.userName).find().first()
+        currentUser = userResult
+        return currentUser!!
     }
 
 }

@@ -54,6 +54,8 @@ dependencies {
 
     //Maps
     implementation ("com.google.android.gms:play-services-maps:18.2.0")
+    // location
+    implementation ("com.google.android.gms:play-services-location:21.2.0")
 
     // Realm Database
     implementation ("io.realm.kotlin:library-base:1.11.0")
@@ -62,6 +64,8 @@ dependencies {
     // KTX libs
     implementation ("androidx.lifecycle:lifecycle-viewmodel-ktx:2.4.0")
     implementation ("androidx.lifecycle:lifecycle-livedata-ktx:2.4.0")
+    implementation ("androidx.lifecycle:lifecycle-runtime-ktx:2.4.0")
+    implementation ("androidx.lifecycle:lifecycle-service:2.4.0")
 
     implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.0") // If using coroutines with the SDK
 }

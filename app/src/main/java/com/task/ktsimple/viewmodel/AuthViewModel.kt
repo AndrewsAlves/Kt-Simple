@@ -70,6 +70,7 @@ class AuthViewModel : ViewModel() {
 
     fun updateCurrentUser(user : User) {
         _currentUser.value = user
+        RealmDB.currentUser =  user
     }
 
     @Throws(AuthException::class)
@@ -82,12 +83,12 @@ class AuthViewModel : ViewModel() {
 
         return if (authState.value == AuthState.SIGN_IN) {
             val signedInUser = RealmDB.loginUser(user)
-            updateCurrentUser(user)
+            updateCurrentUser(signedInUser)
             addSignedInUser(signedInUser)
             signedInUser
         } else {
             val signedInUser = RealmDB.createUser(user)
-            updateCurrentUser(user)
+            updateCurrentUser(signedInUser)
             addSignedInUser(signedInUser)
             signedInUser
         }

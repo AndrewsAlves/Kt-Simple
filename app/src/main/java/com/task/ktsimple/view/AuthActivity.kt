@@ -65,7 +65,6 @@ class AuthActivity : AppCompatActivity() {
         }
 
         // Recycler View
-
         ui.rvSwitchAccount.layoutManager = LinearLayoutManager(this)
         val adapter = RecyclerViewAdapter(this, viewModel.signedInUsers.value!!)
         ui.rvSwitchAccount.adapter = adapter
