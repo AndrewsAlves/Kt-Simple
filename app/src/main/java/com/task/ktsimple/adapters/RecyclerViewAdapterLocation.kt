@@ -16,7 +16,7 @@ import com.task.ktsimple.model.User
  * Created by Admin on 08,March,2024
  */
 
-class RecyclerViewAdapterLocation(val context : Context, private val dataList: List<Location>) :
+class RecyclerViewAdapterLocation(val context : Context,var dataList: List<Location>) :
     RecyclerView.Adapter<RecyclerViewAdapterLocation.MyViewHolder>() {
 
     var itemClickedListener : ItemClickedListener? = null

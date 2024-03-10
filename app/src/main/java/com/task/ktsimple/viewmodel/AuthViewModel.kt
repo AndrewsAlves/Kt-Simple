@@ -68,6 +68,10 @@ class AuthViewModel : ViewModel() {
         _signInUserList.value = _signInUserList.value
     }
 
+    fun deleteSignedInUser(user : User) {
+        _signInUserList.value?.remove(user)
+    }
+
     fun updateCurrentUser(user : User) {
         _currentUser.value = user
         RealmDB.currentUser =  user
@@ -92,5 +96,14 @@ class AuthViewModel : ViewModel() {
             addSignedInUser(signedInUser)
             signedInUser
         }
+    }
+
+    fun loginSelectedUser(user : User) {
+        updateCurrentUser(user)
+    }
+
+    fun logoutUser(user : User) {
+        RealmDB.logoutUser(user)
+        deleteSignedInUser(user)
     }
 }

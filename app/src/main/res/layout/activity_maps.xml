@@ -27,15 +27,39 @@
         map:layout_constraintStart_toStartOf="parent"
         map:layout_constraintTop_toTopOf="parent"/>
 
-    <ImageButton
-        android:id="@+id/ib_play_locations"
-        android:layout_width="80dp"
+    <LinearLayout
+        android:id="@+id/ll_play"
+        android:layout_width="match_parent"
         android:layout_height="80dp"
-        android:src="@drawable/ic_play"
+        android:background="@drawable/bg_border_white"
+        android:layout_marginStart="50dp"
+        android:layout_marginEnd="50dp"
         android:layout_marginBottom="50dp"
+        android:orientation="horizontal"
         map:layout_constraintBottom_toBottomOf="parent"
         map:layout_constraintEnd_toEndOf="parent"
-        map:layout_constraintStart_toStartOf="parent"/>
+        map:layout_constraintStart_toStartOf="parent">
+
+        <ImageView
+            android:id="@+id/iv_play_locations"
+            android:padding="20dp"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:src="@drawable/ic_play"
+            android:background="#00000000"/>
+
+        <TextView
+            android:id="@+id/tv_location_details"
+            android:padding="10dp"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:text="Users Location"
+            android:textColor="@color/main"
+            android:layout_height="match_parent"/>
+
+    </LinearLayout>
+
+
 
 
 

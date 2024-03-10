@@ -77,6 +77,16 @@ object RealmDB {
         }
     }
 
+    fun logoutUser(user : User) {
+        if (realmDb == null) openRealm()
+
+        realmDb!!.writeBlocking {
+            val userResult: User = query<User>("userName == $0", user.userName).find().first()
+            userResult.signedIn = false
+        }
+
+    }
+
     fun getAllSignedInUser() : List<User> {
         if (realmDb == null) openRealm()
         val userResult: List<User> = realmDb!!.query<User>("signedIn == true").find()

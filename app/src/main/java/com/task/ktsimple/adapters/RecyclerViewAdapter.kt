@@ -41,7 +41,7 @@ class RecyclerViewAdapter(val context : Context, private val dataList: List<User
                 itemClickedListener?.itemClicked(position, dataList[position])
             }
             btnTvSignout.setOnClickListener {
-                itemClickedListener?.clickedSignOut()
+                itemClickedListener?.clickedSignOut(position, dataList[position])
             }
         }
     }

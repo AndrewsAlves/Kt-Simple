@@ -15,6 +15,8 @@ import com.task.ktsimple.adapters.RecyclerViewAdapter
 import com.task.ktsimple.enums.AuthErrors
 import com.task.ktsimple.enums.AuthState
 import com.task.ktsimple.exceptions.AuthException
+import com.task.ktsimple.interfaces.ItemClickedListener
+import com.task.ktsimple.model.User
 import com.task.ktsimple.viewmodel.LocationListViewModel
 
 class AuthActivity : AppCompatActivity() {
@@ -51,7 +53,7 @@ class AuthActivity : AppCompatActivity() {
 
             try {
                 val user = viewModel.authUser()
-                startActivity(Intent(this, LocationsListActivity::class.java))
+                launchLocationsActivity()
 
             } catch (e : AuthException) {
                 when(e.authErrors) {
@@ -67,7 +69,20 @@ class AuthActivity : AppCompatActivity() {
         // Recycler View
         ui.rvSwitchAccount.layoutManager = LinearLayoutManager(this)
         val adapter = RecyclerViewAdapter(this, viewModel.signedInUsers.value!!)
+        adapter.setClickedListener(object  : ItemClickedListener {
+            override fun itemClicked(index: Int, item: Any) {
+                val user : User = item as User
+                viewModel.loginSelectedUser(user)
+                launchLocationsActivity()
+            }
+
+            override fun clickedSignOut(index : Int, item : User) {
+                viewModel.logoutUser(item)
+                adapter.notifyItemRemoved(index)
+            }
+        })
         ui.rvSwitchAccount.adapter = adapter
+
 
         // Observers
         viewModel.authState.observe(this)  {
@@ -102,7 +117,7 @@ class AuthActivity : AppCompatActivity() {
         }
     }
 
-    fun setUiForSignUp() {
-
+    fun launchLocationsActivity() {
+        startActivity(Intent(this, LocationsListActivity::class.java))
     }
 }

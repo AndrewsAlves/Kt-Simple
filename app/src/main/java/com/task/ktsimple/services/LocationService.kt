@@ -1,11 +1,13 @@
 package com.task.ktsimple.services
 
+import android.app.AlertDialog
 import android.app.NotificationManager
 import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.location.Geocoder
 import android.os.IBinder
+import android.provider.Settings
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.google.android.gms.location.LocationServices
@@ -55,6 +57,7 @@ class LocationService: LifecycleService() {
         val notification = NotificationCompat.Builder(this, "location")
             .setContentTitle("Tracking location...")
             .setContentText("Location: null")
+            .setPriority(NotificationManager.IMPORTANCE_MIN)
             .setSmallIcon(R.drawable.ic_launcher_background)
             .setOngoing(true)
 
@@ -62,9 +65,7 @@ class LocationService: LifecycleService() {
 
         locationClient
             .getLocationUpdates(10000L)
-            .catch { e ->
-                stop()
-            }
+            .catch { e -> }
             .onEach { location ->
 
                 Log.d(TAG, "Got Location")
@@ -94,6 +95,7 @@ class LocationService: LifecycleService() {
 
             }.launchIn(serviceScope)
 
+        Log.d(TAG, "Starting Notification")
         startForeground(1, notification.build())
     }
 

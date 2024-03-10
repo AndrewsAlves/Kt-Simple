@@ -2,8 +2,13 @@ package com.task.ktsimple.view
 
 import android.Manifest
 import android.app.ActivityManager
+import android.app.AlertDialog
+import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.location.LocationManager
 import android.os.Bundle
+import android.provider.Settings
 import android.util.Log
 import android.view.View
 import android.widget.AdapterView
@@ -69,9 +74,8 @@ class LocationsListActivity : AppCompatActivity(), OnItemSelectedListener{
         // Recycler View
         val clickedListener = object : ItemClickedListener {
             override fun itemClicked(index: Int, item: Any) {
-
+                startActivity(Intent(this@LocationsListActivity, MapsActivity::class.java))
             }
-            override fun clickedSignOut() {}
         }
 
         ui.rvLocations.layoutManager = LinearLayoutManager(this)
@@ -81,7 +85,8 @@ class LocationsListActivity : AppCompatActivity(), OnItemSelectedListener{
 
         viewModel.currentUser.observe(this) {
             updateLocationText(it.userName)
-            ui.rvLocations.adapter!!.notifyDataSetChanged()
+            rvAdapter.dataList = viewModel.currentUser.value!!.locations
+            rvAdapter.notifyDataSetChanged()
         }
 
         // Start With location
@@ -93,7 +98,7 @@ class LocationsListActivity : AppCompatActivity(), OnItemSelectedListener{
         lifecycleScope.launch {
             while (true) {
                 viewModel.updateUserLocations()
-                delay(10000)
+                delay(10100)
             }
         }
     }
@@ -120,6 +125,7 @@ class LocationsListActivity : AppCompatActivity(), OnItemSelectedListener{
         if (ContextCompat.checkSelfPermission(
                 this,
                 Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            if (!isGPSEnabled(this)) showEnableGPSDialog(this)
             viewModel.updateLocationPermission(true)
         } else {
             // Request location permission
@@ -130,6 +136,11 @@ class LocationsListActivity : AppCompatActivity(), OnItemSelectedListener{
         }
     }
 
+    fun isGPSEnabled(context: Context): Boolean {
+        val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
+    }
+
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
@@ -138,13 +149,39 @@ class LocationsListActivity : AppCompatActivity(), OnItemSelectedListener{
         if (requestCode == PERMISION_REQUEST_CODE) {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 viewModel.updateLocationPermission(true)
-
+                if (!isGPSEnabled(this)) showEnableGPSDialog(this)
                 viewModel.startLocationService(applicationContext)
 
             } else {
                 viewModel.updateLocationPermission(false)
             }
         } else super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+    }
+
+    /**
+     *
+     * HANDLE USER TO TURN ON THE LOCATION
+     *
+     */
+
+    fun showEnableGPSDialog(context: Context) {
+        val alertDialogBuilder = AlertDialog.Builder(context)
+        alertDialogBuilder.apply {
+            setTitle("Enable GPS")
+            setMessage("GPS is required for Higher Accuracy. Turn it ON in Settings. Go to Settings?")
+            setCancelable(false)
+            setPositiveButton("Yes") { _, _ ->
+                // Open location settings
+                val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+                context.startActivity(intent)
+            }
+            setNegativeButton("No") { dialog, _ ->
+                dialog.cancel()
+            }
+        }
+
+        val alertDialog = alertDialogBuilder.create()
+        alertDialog.show()
     }
 
     /**
