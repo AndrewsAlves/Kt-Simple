@@ -28,6 +28,7 @@ import com.task.ktsimple.adapters.SpinnerAdapter
 import com.task.ktsimple.databinding.ActivityLocationsListBinding
 import com.task.ktsimple.interfaces.ItemClickedListener
 import com.task.ktsimple.model.User
+import com.task.ktsimple.services.LocationService
 import com.task.ktsimple.viewmodel.LocationListViewModel
 import kotlinx.coroutines.Delay
 import kotlinx.coroutines.Dispatchers
@@ -67,7 +68,9 @@ class LocationsListActivity : AppCompatActivity(), OnItemSelectedListener{
         viewModel.locationPermission.observe(this) {
             if (it) {
                 // Start Location Service
-                viewModel.startLocationService(applicationContext)
+                if (!LocationService.isRunning) {
+                    viewModel.startLocationService(applicationContext)
+                } else Log.d(TAG, "Location Service Already Running")
             } else {
                 Snackbar.make(ui.root, "Need Location and Notification Permission granted All time to use this activity", Snackbar.LENGTH_LONG).show()
             }
@@ -205,7 +208,7 @@ class LocationsListActivity : AppCompatActivity(), OnItemSelectedListener{
      * CHECK SERVICE IS ALREADY RUNNING
      */
 
-    fun isServiceRunning(): Boolean {
+    fun isServiceAlreadyRunning(): Boolean {
         val manager = getSystemService(ACTIVITY_SERVICE) as ActivityManager
         for (service in manager.getRunningServices(Int.MAX_VALUE)) {
             if ("com.task.ktsimple" == service.service.className) {

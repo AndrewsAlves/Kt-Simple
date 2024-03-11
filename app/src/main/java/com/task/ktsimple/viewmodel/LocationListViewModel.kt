@@ -1,8 +1,10 @@
 package com.task.ktsimple.viewmodel
 
+import android.app.ActivityManager
 import android.content.Context
 import android.content.Intent
 import android.util.Log
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData

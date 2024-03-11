@@ -104,9 +104,11 @@ class LocationService: LifecycleService() {
 
         Log.d(TAG, "Starting Notification")
         startForeground(1, notification.build())
+        isRunning = true
     }
 
     private fun stop() {
+        isRunning = false
         stopForeground(STOP_FOREGROUND_REMOVE)
         stopSelf()
     }
@@ -114,10 +116,12 @@ class LocationService: LifecycleService() {
     override fun onDestroy() {
         super.onDestroy()
         serviceScope.cancel()
+        isRunning = false
     }
 
     companion object {
         const val ACTION_START = "ACTION_START"
         const val ACTION_STOP = "ACTION_STOP"
+        var isRunning = false
     }
 }
