@@ -7,6 +7,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.LocationManager
+import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.util.Log
@@ -41,7 +42,8 @@ class LocationsListActivity : AppCompatActivity(), OnItemSelectedListener{
 
     private val viewModel: LocationListViewModel by viewModels()
     private lateinit var ui: ActivityLocationsListBinding
-    private val PERMISION_REQUEST_CODE = 123
+    private val PERMISION_REQUEST_CODE_LOCATION = 123
+    private val PERMISION_REQUEST_CODE_BOTH = 321
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -67,7 +69,7 @@ class LocationsListActivity : AppCompatActivity(), OnItemSelectedListener{
                 // Start Location Service
                 viewModel.startLocationService(applicationContext)
             } else {
-                Snackbar.make(ui.root, "Need Location Permission granted All time to use this activity", Snackbar.LENGTH_LONG).show()
+                Snackbar.make(ui.root, "Need Location and Notification Permission granted All time to use this activity", Snackbar.LENGTH_LONG).show()
             }
         }
 
@@ -124,17 +126,23 @@ class LocationsListActivity : AppCompatActivity(), OnItemSelectedListener{
      */
 
     fun handleLocationPermission() {
-        if (ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED &&
+            ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
             if (!isGPSEnabled(this)) showEnableGPSDialog(this)
             viewModel.updateLocationPermission(true)
         } else {
             // Request location permission
-            ActivityCompat.requestPermissions(
-                this,
-                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-                PERMISION_REQUEST_CODE)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                ActivityCompat.requestPermissions(
+                    this,
+                    arrayOf(Manifest.permission.POST_NOTIFICATIONS, Manifest.permission.ACCESS_FINE_LOCATION),
+                    PERMISION_REQUEST_CODE_BOTH)
+            } else {
+                ActivityCompat.requestPermissions(
+                    this,
+                    arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                    PERMISION_REQUEST_CODE_LOCATION)
+            }
         }
     }
 
@@ -143,20 +151,26 @@ class LocationsListActivity : AppCompatActivity(), OnItemSelectedListener{
         return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
     }
 
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
-        if (requestCode == PERMISION_REQUEST_CODE) {
-            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        if (requestCode == PERMISION_REQUEST_CODE_BOTH || requestCode == PERMISION_REQUEST_CODE_LOCATION) {
+            if (grantResults.isNotEmpty()) {
+                if (grantResults.size == 2 &&
+                    grantResults[0] != PackageManager.PERMISSION_GRANTED ||
+                    grantResults[1] != PackageManager.PERMISSION_GRANTED) {
+                    viewModel.updateLocationPermission(false)
+
+                    return
+                } else {
+                    if (grantResults[0] != PackageManager.PERMISSION_GRANTED){
+                        viewModel.updateLocationPermission(false)
+                        return
+                    }
+                }
+
                 viewModel.updateLocationPermission(true)
                 if (!isGPSEnabled(this)) showEnableGPSDialog(this)
-                viewModel.startLocationService(applicationContext)
-
-            } else {
-                viewModel.updateLocationPermission(false)
             }
+
         } else super.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
 

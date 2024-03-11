@@ -32,7 +32,7 @@ class LocationTask(
             val isGpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
             val isNetworkEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
             if(!isGpsEnabled || !isNetworkEnabled) {
-                throw LocationClient.LocationException("GPS is disabled")
+                //throw LocationClient.LocationException("GPS is disabled")
             }
 
             val request = LocationRequest.create()
