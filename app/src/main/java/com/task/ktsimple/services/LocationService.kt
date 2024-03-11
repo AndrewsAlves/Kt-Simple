@@ -2,6 +2,7 @@ package com.task.ktsimple.services
 
 import android.app.AlertDialog
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
@@ -54,18 +55,24 @@ class LocationService: LifecycleService() {
 
         Log.d(TAG, "Service Started")
 
+        val stopServiceIntent = Intent(this, NotificationStopBR::class.java)
+        val stopServicePendingIntent = PendingIntent.getBroadcast(this, 0, stopServiceIntent, PendingIntent.FLAG_IMMUTABLE)
+
         val notification = NotificationCompat.Builder(this, "location")
             .setContentTitle("Tracking location...")
             .setContentText("Location: null")
             .setPriority(NotificationManager.IMPORTANCE_MIN)
             .setSmallIcon(R.drawable.ic_launcher_background)
             .setOngoing(true)
+            .addAction(0,  "Stop", stopServicePendingIntent)
 
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
         locationClient
             .getLocationUpdates(10000L)
-            .catch { e -> }
+            .catch { e ->
+                stop()
+                Log.e(TAG, "Location Exception")}
             .onEach { location ->
 
                 Log.d(TAG, "Got Location")

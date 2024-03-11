@@ -31,11 +31,12 @@ class LocationTask(
             val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
             val isGpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
             val isNetworkEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
-            if(!isGpsEnabled && !isNetworkEnabled) {
+            if(!isGpsEnabled || !isNetworkEnabled) {
                 throw LocationClient.LocationException("GPS is disabled")
             }
 
             val request = LocationRequest.create()
+                .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
                 .setInterval(interval)
                 .setFastestInterval(interval)
 

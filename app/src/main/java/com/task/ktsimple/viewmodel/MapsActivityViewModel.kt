@@ -35,6 +35,11 @@ class MapsActivityViewModel : ViewModel() {
         }
     }
 
+    fun updateAnimatingIndex(index : Int){
+        _animatingIndex.value = index
+        _animatingLocation.value = _currentUser.value!!.locations[_animatingIndex.value!!]
+    }
+
     fun playOrPause() {
         _playingLocation.value = !playingLocation.value!!
     }
@@ -47,6 +52,7 @@ class MapsActivityViewModel : ViewModel() {
     }
 
     fun incrementAnimatingIndex() {
+        if (_animatingIndex.value!! >= totalLocation - 1) return
         _animatingIndex.value = _animatingIndex.value!! + 1
         _animatingLocation.value = _currentUser.value!!.locations[_animatingIndex.value!!]
     }

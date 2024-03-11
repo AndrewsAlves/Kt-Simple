@@ -2,6 +2,7 @@ package com.task.ktsimple.view
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.activity.viewModels
 import androidx.lifecycle.lifecycleScope
@@ -12,6 +13,7 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.task.ktsimple.R
 import com.task.ktsimple.databinding.ActivityMapsBinding
@@ -30,6 +32,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var ui: ActivityMapsBinding
 
     var animationJob : Job? = null
+    var marker : Marker? = null
 
     private val viewModel : MapsActivityViewModel by viewModels()
 
@@ -38,6 +41,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
         ui = ActivityMapsBinding.inflate(layoutInflater)
         setContentView(ui.root)
+
+
         ui.llPlay.visibility = View.INVISIBLE
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
@@ -61,10 +66,11 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         }
 
         val userLoc = LatLng(21.7679, 78.8718)
-        mMap.addMarker(MarkerOptions().position(userLoc))
+        marker = mMap.addMarker(MarkerOptions().position(userLoc))
         mMap.moveCamera(CameraUpdateFactory.newLatLng(userLoc))
 
         setObservers()
+        viewModel.updateAnimatingIndex(intent.getIntExtra("location_index", 0))
     }
 
     fun setMapsLoc() {
@@ -74,7 +80,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         ui.tvLocationDetails.text = location.address
 
         val userLoc = LatLng(location.lat, location.lon)
-        mMap.addMarker(MarkerOptions().position(userLoc))
+        marker!!.position = userLoc
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(userLoc, 15f))
     }
 
@@ -83,12 +89,16 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
             if (it) {
                  animationJob = lifecycleScope.launch(Dispatchers.IO) {
-                    while (viewModel.animatingIndex.value!! < viewModel.totalLocation && this.isActive) {
+                    while (viewModel.animatingIndex.value!! < viewModel.totalLocation - 1 && this.isActive) {
                         delay(3000)
                         withContext(Dispatchers.Main) {
                             viewModel.incrementAnimatingIndex()
                         }
                     }
+
+                     withContext(Dispatchers.Main) {
+                         ui.ivPlayLocations.performClick()
+                     }
                 }
             } else {
                 animationJob?.cancel()
@@ -104,6 +114,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         }
 
         ui.ivPlayLocations.setOnClickListener {
+            Log.d(TAG, "Performed Click")
             viewModel.playOrPause()
             if (viewModel.playingLocation.value!!) ui.ivPlayLocations.setImageDrawable(getDrawable(R.drawable.ic_pause))
             else ui.ivPlayLocations.setImageDrawable(getDrawable(R.drawable.ic_play))

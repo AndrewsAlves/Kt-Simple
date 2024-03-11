@@ -74,7 +74,9 @@ class LocationsListActivity : AppCompatActivity(), OnItemSelectedListener{
         // Recycler View
         val clickedListener = object : ItemClickedListener {
             override fun itemClicked(index: Int, item: Any) {
-                startActivity(Intent(this@LocationsListActivity, MapsActivity::class.java))
+                val intent = Intent(this@LocationsListActivity, MapsActivity::class.java)
+                intent.putExtra("location_index", index)
+                startActivity(intent)
             }
         }
 
